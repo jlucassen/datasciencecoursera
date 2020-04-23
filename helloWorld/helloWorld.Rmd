@@ -5,7 +5,7 @@ date: "4/22/2020"
 output: html_document
 ---
 
-# R Markdown
+##This is a markdown file
 * This is R Markdown! It's pretty nifty. 
 * You can make bullet points by starting each line with an asterisk and a space followed by your content, and ended with a space. That space at the end is easy to forget, but important. 
 * To make headers of nesting level n, put n #'s and a space before the text. Again space is important - without that, it won't work! 
