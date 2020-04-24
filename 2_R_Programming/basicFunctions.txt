@@ -1,0 +1,20 @@
+add2 <- function(a,b) {
+  a+b
+}
+
+above10 <- function(x) {
+  mask <- x > 10
+  x[mask]
+}
+
+above <- function(x, n = 10) { #default of n is 10
+  x[which(x>n)]
+}
+
+colMeans <- function(x, RNA = TRUE) {
+  means <- numeric(ncol(x))
+  for (col in seq_along(means)) {
+    means[col] <- mean(x[, col], na.rm = RNA)
+  }
+  means
+}
