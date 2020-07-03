@@ -1,0 +1,76 @@
+Codebook
+===============================================================================
+Features and feature selection:
+
+The features selected for this database come from the accelerometer and 
+gyroscope 3-axial raw signals tAcc-XYZ and tGyro-XYZ. These time domain signals 
+(prefix 't' to denote time) were captured at a constant rate of 50 Hz. Then they
+were filtered using a median filter and a 3rd order low pass Butterworth filter 
+with a corner frequency of 20 Hz to remove noise. Similarly, the acceleration 
+signal was then separated into body and gravity acceleration signals 
+(tBodyAcc-XYZ and tGravityAcc-XYZ) using another low pass Butterworth filter 
+with a corner frequency of 0.3 Hz. 
+
+Subsequently, the body linear acceleration and angular velocity were derived in 
+time to obtain Jerk signals (tBodyAccJerk-XYZ and tBodyGyroJerk-XYZ). Also the 
+magnitude of these three-dimensional signals were calculated using the Euclidean
+norm (tBodyAccMag, tGravityAccMag, tBodyAccJerkMag, tBodyGyroMag, 
+tBodyGyroJerkMag). 
+
+Finally a Fast Fourier Transform (FFT) was applied to some of these signals 
+producing fBodyAcc-XYZ, fBodyAccJerk-XYZ, fBodyGyro-XYZ, fBodyAccJerkMag, 
+fBodyGyroMag, fBodyGyroJerkMag. (Note the 'f' to indicate frequency domain 
+signals). 
+
+These signals were used to estimate variables of the feature vector for each 
+pattern:'-XYZ' is used to denote 3-axial signals in the X, Y and Z directions.
+
+tBodyAcc-XYZ
+tGravityAcc-XYZ
+tBodyAccJerk-XYZ
+tBodyGyro-XYZ
+tBodyGyroJerk-XYZ
+tBodyAccMag
+tGravityAccMag
+tBodyAccJerkMag
+tBodyGyroMag
+tBodyGyroJerkMag
+fBodyAcc-XYZ
+fBodyAccJerk-XYZ
+fBodyGyro-XYZ
+fBodyAccMag
+fBodyAccJerkMag
+fBodyGyroMag
+fBodyGyroJerkMag
+
+The set of variables that were estimated from these signals are: 
+
+mean: Mean value
+std: Standard deviation
+
+The complete list of variables can be found in the first row of tidied_data.csv,
+or in the first column of tidied_means.csv.
+===============================================================================
+Data processing details
+
+The entire process is done by run_analysis.R. All that is needed is to have the
+original dataset in a folder called 'UCI HAR Dataset', and in the same folder
+as run_analysis.R. The R script first reads in the X_test, y_test, X_train, and
+y_train txt filed as tables, and then combines the test and train values for 
+each X and y using rbind(), test values on top. Next, the script reads in 
+features.txt as a table, and selects the second column, which contains the field
+names. These field names are then processed, to remove all instances of "-" and
+"()". The processed field names are applied to the columns of the X data. Grep
+is then used on the vector of field names, to create a vector containing the 
+indices of the mean and std data, which are the only fields we're interested in.
+The x data is then subsetted using this vector to give us only those fields. 
+Next, the script reads in activity_labels.txt as a table, and uses it to produce
+a factor variable with the y data encoded according to the levels and labels in
+activity_labels.txt. This is then added to the data as a column called
+'activities'. Next, the script reads in subject_test.txt and subject_train.txt
+as tables, combines them using rbind() with test first, and then adds the first
+column of the result, which contains the identifiers for the subjects, to the
+data as a new column called 'subject'. Finally, colmeans() is called for each
+numeric column, and the result is stored in a vector. The tidied data and the
+calculated means are each written to a .csv file in the same folder as 
+run_analysis.R
