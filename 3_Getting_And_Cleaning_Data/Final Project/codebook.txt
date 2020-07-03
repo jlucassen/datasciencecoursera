@@ -48,8 +48,35 @@ The set of variables that were estimated from these signals are:
 mean: Mean value
 std: Standard deviation
 
-The complete list of variables can be found in the first row of tidied_data.csv,
-or in the first column of tidied_means.csv.
+The complete list of variables is as follows:
+
+ [1] "tBodyAccmeanX"                "tBodyAccmeanY"                "tBodyAccmeanZ"               
+ [4] "tBodyAccstdX"                 "tBodyAccstdY"                 "tBodyAccstdZ"                
+ [7] "tGravityAccmeanX"             "tGravityAccmeanY"             "tGravityAccmeanZ"            
+[10] "tGravityAccstdX"              "tGravityAccstdY"              "tGravityAccstdZ"             
+[13] "tBodyAccJerkmeanX"            "tBodyAccJerkmeanY"            "tBodyAccJerkmeanZ"           
+[16] "tBodyAccJerkstdX"             "tBodyAccJerkstdY"             "tBodyAccJerkstdZ"            
+[19] "tBodyGyromeanX"               "tBodyGyromeanY"               "tBodyGyromeanZ"              
+[22] "tBodyGyrostdX"                "tBodyGyrostdY"                "tBodyGyrostdZ"               
+[25] "tBodyGyroJerkmeanX"           "tBodyGyroJerkmeanY"           "tBodyGyroJerkmeanZ"          
+[28] "tBodyGyroJerkstdX"            "tBodyGyroJerkstdY"            "tBodyGyroJerkstdZ"           
+[31] "tBodyAccMagmean"              "tBodyAccMagstd"               "tGravityAccMagmean"          
+[34] "tGravityAccMagstd"            "tBodyAccJerkMagmean"          "tBodyAccJerkMagstd"          
+[37] "tBodyGyroMagmean"             "tBodyGyroMagstd"              "tBodyGyroJerkMagmean"        
+[40] "tBodyGyroJerkMagstd"          "fBodyAccmeanX"                "fBodyAccmeanY"               
+[43] "fBodyAccmeanZ"                "fBodyAccstdX"                 "fBodyAccstdY"                
+[46] "fBodyAccstdZ"                 "fBodyAccmeanFreqX"            "fBodyAccmeanFreqY"           
+[49] "fBodyAccmeanFreqZ"            "fBodyAccJerkmeanX"            "fBodyAccJerkmeanY"           
+[52] "fBodyAccJerkmeanZ"            "fBodyAccJerkstdX"             "fBodyAccJerkstdY"            
+[55] "fBodyAccJerkstdZ"             "fBodyAccJerkmeanFreqX"        "fBodyAccJerkmeanFreqY"       
+[58] "fBodyAccJerkmeanFreqZ"        "fBodyGyromeanX"               "fBodyGyromeanY"              
+[61] "fBodyGyromeanZ"               "fBodyGyrostdX"                "fBodyGyrostdY"               
+[64] "fBodyGyrostdZ"                "fBodyGyromeanFreqX"           "fBodyGyromeanFreqY"          
+[67] "fBodyGyromeanFreqZ"           "fBodyAccMagmean"              "fBodyAccMagstd"              
+[70] "fBodyAccMagmeanFreq"          "fBodyBodyAccJerkMagmean"      "fBodyBodyAccJerkMagstd"      
+[73] "fBodyBodyAccJerkMagmeanFreq"  "fBodyBodyGyroMagmean"         "fBodyBodyGyroMagstd"         
+[76] "fBodyBodyGyroMagmeanFreq"     "fBodyBodyGyroJerkMagmean"     "fBodyBodyGyroJerkMagstd"     
+[79] "fBodyBodyGyroJerkMagmeanFreq"
 ===============================================================================
 Data processing details
 
@@ -72,5 +99,5 @@ as tables, combines them using rbind() with test first, and then adds the first
 column of the result, which contains the identifiers for the subjects, to the
 data as a new column called 'subject'. Finally, colmeans() is called for each
 numeric column, and the result is stored in a vector. The tidied data and the
-calculated means are each written to a .csv file in the same folder as 
+calculated means are each written to a .txt file in the same folder as 
 run_analysis.R

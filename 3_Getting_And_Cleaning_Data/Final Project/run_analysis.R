@@ -32,5 +32,5 @@ data$subject <- subjects[,1]
 means <- colMeans(data[sapply(data, is.numeric)]) 
 
 #output data files
-write.csv(data, "tidied_data.csv")
-write.csv(means, "tidied_means.csv")
+write.table(data, "tidied_data.txt", row.names = FALSE)
+write.table(means, "tidied_means.txt", row.names = FALSE)
