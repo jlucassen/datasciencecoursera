@@ -20,7 +20,7 @@ data <- x[selectedFields]
 #pull in activity labels, translate y data, attach to data
 activity_labels <- read.table("UCI HAR Dataset/activity_labels.txt")
 activities <- factor(y[,1], activity_labels$V1, activity_labels$V2)
-data$activities <- activities
+data$activity <- activities
 
 #pull in subjects, merge test/train, attach to data
 subject_test <- read.table("UCI HAR Dataset/test/subject_test.txt")
@@ -28,9 +28,11 @@ subject_train <- read.table("UCI HAR Dataset/train/subject_train.txt")
 subjects <- rbind(subject_test, subject_train)
 data$subject <- subjects[,1]
 
-#calculate means for each column
-means <- colMeans(data[sapply(data, is.numeric)]) 
+#calculate second set of data, by subject and activity
+data2 <- data %>%
+  group_by(subject, activity) %>%
+  summarise_all(funs(mean))
 
 #output data files
 write.table(data, "tidied_data.txt", row.names = FALSE)
-write.table(means, "tidied_means.txt", row.names = FALSE)
+write.table(data2, "tidied_data_final.txt", row.names = FALSE)

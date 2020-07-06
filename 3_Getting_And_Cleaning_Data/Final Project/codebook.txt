@@ -97,7 +97,6 @@ activity_labels.txt. This is then added to the data as a column called
 'activities'. Next, the script reads in subject_test.txt and subject_train.txt
 as tables, combines them using rbind() with test first, and then adds the first
 column of the result, which contains the identifiers for the subjects, to the
-data as a new column called 'subject'. Finally, colmeans() is called for each
-numeric column, and the result is stored in a vector. The tidied data and the
-calculated means are each written to a .txt file in the same folder as 
-run_analysis.R
+data as a new column called 'subject'. Finally, the data is grouped by the
+subject and activity columns, and means are calculated for each variable in
+each group.

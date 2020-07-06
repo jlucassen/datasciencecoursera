@@ -37,16 +37,16 @@ See 'Features Info' for more details.
 ===============================================================================
 Record details:
 
-Each record in tidied_data.txt contains:
+Each record in tidied_data.txt and tidied_data_final.txt contains:
 - 79 numeric fields containing time and frequency domain variables
 - 1 string-factor field containing labeling the activity
 - 1 integer field containing the identifier of the subject for the experiment
 
-For each of the 79 numeric time/frequency sensor data fields, there is also an
-entry in tidied_means.txt containing the mean for that column. There is also an
-entry for subject, since the field is technically numeric, but it is meaningless
-and can be safely ignored.
-==============================================================================
+In tidied_data.txt, each entry is recorded separately - as such, there are
+several repeats for each combination of subject and activity.
+In tidied_data_final.txt, the entries for a given subject-activity pair are
+summarized in one line, with the mean values of each column.
+===============================================================================
 This project includes the following files:
 
 - README.txt
