@@ -1,0 +1,171 @@
+---
+title: "Reproducible Research: Peer Assessment 1"
+output: 
+  html_document:
+    keep_md: true
+---
+
+
+## Loading and preprocessing the data
+First, check if a file called data.zip is already in the local directory, and
+if not, download the data from the URL given in the assignment, using the
+file name data.zip.
+
+
+```r
+if (!file.exists("data.zip")) {
+  download.file("https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip", "data.zip")
+}
+```
+
+Next, pull the data into R. The data has a header, so read with header=T.
+
+
+```r
+data <- read.csv(unz("data.zip", filename="activity.csv"), header=T)
+```
+
+Luckily everything is pretty tidy, so no pre-processing is needed.
+
+## What is mean total number of steps taken per day?
+
+To calculate total steps per day, group the data by date recorded and add up the
+total steps for each date. For now, we can just ignore NA values.
+
+
+```r
+dailySteps <- aggregate(steps ~ date, data, FUN = sum, na.rm=T)
+```
+
+To get an idea of what the data looks like, create a histogram and look at the
+mean and median.
+
+
+```r
+hist(dailySteps$steps, breaks=10, xlab="Steps", ylab="Frequency", main="Histogram of Daily Steps")
+abline(v=mean(dailySteps$steps), col="red")
+abline(v=median(dailySteps$steps), col="blue")
+```
+
+![](Project-1_files/figure-html/unnamed-chunk-5-1.png)<!-- -->
+
+On the histogram above, the mean number of steps taken per day is
+10766 steps, shown in red, and the median steps per
+day is 10765 steps, shown in blue. If only the blue is 
+visible, the two are probably very close to each other.
+
+## What is the average daily activity pattern?
+
+To determine the average activity pattern throughout a typical day, group the
+data by time recorded ("interval"), and calculate average steps at each time.
+For now, we continue to ignore missing values.
+
+
+```r
+timeSteps <- aggregate(steps ~ interval, data, FUN = mean, na.rm=T)
+```
+
+To see what the data looks like, plot it as a time series against the intervals
+observed.
+
+
+```r
+plot(levels(factor(data$interval)), timeSteps$steps, type='l', xlab="Interval", ylab="Average Steps", main="Average Daily Activity Pattern")
+maxTime <- levels(factor(data$interval))[which(timeSteps$steps == max(timeSteps$steps))]
+abline(h=max(timeSteps$steps), col="red")
+abline(v=maxTime, col="blue")
+```
+
+![](Project-1_files/figure-html/unnamed-chunk-7-1.png)<!-- -->
+
+On the time series above, the maximum number of steps taken in any interval on
+an average day is 206 steps, (rounded), as shown in 
+red. This happens at the 104
+th recorded interval of the day, interval 835, as shown in blue.
+
+## Imputing missing values
+
+To impute the missing values, the two obvious strategies are to insert typical
+values either for the day, or for the time interval. To get a sense of which may
+be more reliable, check the standard deviations of each measure.
+
+
+```r
+timeDevs <- aggregate(steps ~ interval, data, FUN = sd, na.rm=T)
+dailyDevs <- aggregate(steps ~ date, data, FUN = sd, na.rm=T)
+mean(timeDevs$steps)  #steps field now holds standard deviation
+```
+
+```
+## [1] 82.97991
+```
+
+```r
+mean(dailyDevs$steps)
+```
+
+```
+## [1] 105.1223
+```
+
+Since the number of steps taken seem to vary less with the time than with the
+day, impute using the mean value for each time interval. First check which
+fields contain NA values:
+
+
+```r
+sapply(data, function(x) {any(is.na(x))}) #check which fields contain NA values
+```
+
+```
+##    steps     date interval 
+##     TRUE    FALSE    FALSE
+```
+
+Since only steps has NA values, that is the only field that needs values
+imputed. Create a mask for which values are NA, record their intervals,
+then copy the data set and fill in the NA values with the corresponding means
+(from timeSteps, since that already has the means of steps by interval).
+
+
+```r
+whichNA <- is.na(data$steps)  #create mask for NA values
+whichInterval <- data$interval[is.na(data$steps)] #record intervals of NA values
+data2 <- data
+data2$steps[whichNA] <- map_dbl(whichInterval, function(x) timeSteps$steps[which(timeSteps$interval==x)])
+```
+
+Next, recalculate total daily steps and re-plot as a histogram, but using data2.
+
+
+```r
+dailySteps2 <- aggregate(steps ~ date, data2, FUN = sum, na.rm=T)
+hist(dailySteps2$steps, breaks=10, xlab="Steps", ylab="Frequency", main="Imputed Histogram of Daily Steps")
+abline(v=mean(dailySteps2$steps), col="red")
+abline(v=median(dailySteps2$steps), col="blue")
+```
+
+![](Project-1_files/figure-html/unnamed-chunk-11-1.png)<!-- -->
+
+## Are there differences in activity patterns between weekdays and weekends?
+
+First, create a factor to reflect whether a given day is a weekday or weekend.
+
+
+```r
+wkdys <- c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday")
+data2$type <- factor(weekdays(as.Date(data2$date)) %in% wkdys, levels = c(TRUE, FALSE), labels = c("weekday", "weekend"))
+```
+
+Next, calculate and plot the typical activity patterns for weekdays and weekends
+
+
+```r
+daySteps <- aggregate(steps ~ interval, subset(data2, type=="weekday"), FUN=mean)
+endSteps <- aggregate(steps ~ interval, subset(data2, type=="weekend"), FUN=mean)
+par(mfrow=c(1,2))
+plot(levels(factor(data2$interval)), daySteps$steps, type='l', xlab="Interval", ylab="Average Steps", main="Weekday Pattern")
+plot(levels(factor(data2$interval)), endSteps$steps, type='l', xlab="Interval", ylab="Average Steps", main="Weekend Pattern")
+```
+
+![](Project-1_files/figure-html/unnamed-chunk-13-1.png)<!-- -->
