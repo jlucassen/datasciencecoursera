@@ -1,0 +1,60 @@
+---
+title: "Course-Project-2"
+output: html_document
+---
+
+## Part 2: Basic Inferential Data Analysis
+### Overview
+This section contains an exploratory analysis of the ToothGrowth data in R's
+datasets package, a basic summary of the data, and an analysis of the effects of
+the supp and dose fields.
+
+### Loading and Exploring the Data
+Make sure the datasets package is loaded, and then grab the ToothGrowth data:
+
+```{r}
+library(datasets)
+tg <- ToothGrowth
+```
+
+Next, explore some basic aspects of the data, to get a sense of what's going on.
+
+```{r}
+dim(tg) #dimensions of data
+head(tg) #examine the first bit of data
+apply(tg, 2, class) #classes of the fields
+```
+
+### Basic Summary
+After very basic exploratory analysis, check the contents of the data itself
+```{r}
+summary(as.numeric(tg$len))
+table(tg$supp)
+table(tg$dose)
+boxplot(len ~ dose*supp, data=tg)
+```
+
+Since supp and dose are discrete while len is continuous, it seems likely that
+this is data from an experiment testing different doses of two different 
+supplements and measuring tooth length. Visually, dose seems strongly correlated
+with greater len. The relationship of sup with len is harder to discern.
+
+### Inferential Statistical Analysis
+Use the statistical tools learned in class (t-test, p-values) to discern the 
+relationships of supp and dose with len.
+
+```{r}
+t.test(tg$len~tg$supp)[c("p.value", "estimate")] #test difference between supp="VC" and supp="OJ"
+t.test(subset(tg$len, tg$dose==1), subset(tg$len, tg$dose==0.5), alternative="greater")[c("p.value", "estimate")] #test difference between dose 0.5 and 1
+t.test(subset(tg$len, tg$dose==2), subset(tg$len, tg$dose==1), alternative="greater")[c("p.value", "estimate")] #test difference between dose 1 and 2
+```
+
+### Conclusions and Underlying Assumptions
+The results of the t-tests above are as follows: at an alpha=0.05 level, there
+is not sufficient evidence for a difference in population means between the
+OJ and VC supplements. However, there is sufficient evidence for differences
+between all three dose levels, pairwise. 
+
+These results rely on the following assumptions: observations are iid, groups
+are unpaired, variables are roughly normally distributed. There are other
+assumptions of course, but these three seem most pertinent.
