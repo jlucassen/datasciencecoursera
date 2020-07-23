@@ -1,0 +1,88 @@
+---
+title: "Course-Project"
+output: html_document
+---
+
+## Introduction
+Here I will analyze the relationship between transmission type (automatic vs
+manual) on the fuel efficiency (miles per gallon) of the cars in the mtcars data
+set. First I will perform an exploratory data analysis, then regression modeling
+and statistical inference, check the reliability of the model with residual
+diagnostics, and finally present conclusions and assessment of uncertainty.
+
+## Exploratory Analysis
+First, to get a rough idea of what kind of data and how much there is in the
+data set, look at the head of mtcars
+
+```{r}
+head(mtcars)
+```
+
+Looks like the transmission type is recorded in the field "am", as a binary
+value where 1 means manual, 0 means automatic. This data is already tidy, so for
+a preliminary analysis we can just use a simple linear model of the correlation
+we hope to test.
+
+```{r}
+mdl_a <- lm(mpg~am, mtcars)
+summary(mdl_a)$coef
+```
+
+This suggests that naively, manual transmissions seem to get 7 more miles per
+gallon. However, there may be bias, since other variables in this data seem 
+likely to be correlated. To check for the possibility of bias, examine the
+correlation matrix, using absolute value to check strength of correlations:
+
+```{r}
+heatmap(abs(cor(mtcars)))
+```
+
+From this, it looks like mpg and am are both significantly correlated with wt,
+cyl, and disp, creating the possibility of bias if these variables are omitted.
+am is also significantly correlated with drat and gear, but this second group
+is less correlated with mpg, making it unlikely to cause bias.
+
+## Regression Modeling and Statistical Inference
+First, create a linear model to regress for the relationship between mpg and am,
+with wt, cyl, and disp included as confounding variables.
+
+```{r}
+mdl_awcd <- lm(mpg~am+wt+cyl+disp, mtcars)
+summary(mdl_awcd)$coef
+```
+
+The coefficient for disp seems quite low, suggesting it may be unnecessary if it
+is sufficiently dependent on the other two confounders to not introduce its own
+effect. To test this, use ANOVA with various combinations of confounders.
+
+```{r}
+mdl_aw <- lm(mpg~am+wt, mtcars)
+mdl_awc <- lm(mpg~am+wt+cyl, mtcars)
+anova(mdl_a, mdl_aw, mdl_awc, mdl_awcd)
+```
+
+This result confirms that the am and wt confounders are necessary, but disp is
+not. Thus, to minimize variance inflation, use only wt and cyl as confounders
+for further analysis and visualization (mdl_awc).
+
+## Residual Diagnostics
+Plot the residuals of the model for any signs that suggest an incorrect model.
+
+```{r}
+res <- resid(mdl_awc)
+plot(res)
+```
+
+Since there is no sign of heteroscedasticity or a visible trend, the model is
+likely acceptable.
+
+## Conclusions and Uncertainty
+In the exploratory analysis, it initially seemed that transmission type had a 
+major effect on mpg, since the coefficient was `r summary(mdl_a)$coef[2,1]` with
+a p-value of `r summary(mdl_a)$coef[2,4]`. 
+
+However, after checking for bias and removing the confounding effects of wt and
+cyl, the coefficient became `r summary(mdl_awc)$coef[2,1]`, with a p-value of
+`r summary(mdl_awc)$coef[2,4]`. This is neither strong nor significant. Thus, 
+there is no evidence that transmission type affects gas mileage, even though it 
+may appear so before removing bias.
