@@ -1,0 +1,20 @@
+library(caret)
+library(gbm)
+set.seed(3433)
+library(AppliedPredictiveModeling)
+data(AlzheimerDisease)
+adData = data.frame(diagnosis,predictors)
+inTrain = createDataPartition(adData$diagnosis, p = 3/4)[[1]]
+training = adData[ inTrain,]
+testing = adData[-inTrain,]
+set.seed(62433)
+rf <- train(diagnosis~., data=training, method="rf")
+gbm <- train(diagnosis~., data=training, method="gbm")
+lda <- train(diagnosis~., data=training, method="lda")
+trainPred <- data.frame(d=training$diagnosis, rf=predict(rf, training), gbm=predict(gbm, training), lda=predict(lda, training))
+stk <- train(d~., data=trainPred, method="rf")
+testPred <- data.frame(d=testing$diagnosis, rf=predict(rf, testing), gbm=predict(gbm, testing), lda=predict(lda, testing))
+mean(testPred$rf==testing$diagnosis)
+mean(testPred$gbm==testing$diagnosis)
+mean(testPred$lda==testing$diagnosis)
+mean(predict(stk, testPred)==testing$diagnosis)

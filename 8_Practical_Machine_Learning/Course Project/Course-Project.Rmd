@@ -1,0 +1,112 @@
+---
+title: "Course-Project"
+output: html_document
+---
+
+## Introduction
+The goal of this project is to use the UCI HAR data set provided in the 
+assignment to train and test a machine learning model to predict the "type" of 
+activity performed. First the data is loaded, cleaned, and explored. Next, three
+candidate models are trained, and their in-sample error rates are compared to
+determine the best predictor. Finally, this best predictor is applied to the
+test set.
+
+```{r setup}
+library(caret)
+```
+
+## Pre-Analysis Preparation
+### Loading the Data
+Read the data straight into R from the links given in the assignment.
+
+```{r download, cache=T}
+train <- read.csv("https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv")
+test <- read.csv("https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv")
+```
+
+### Cleaning and Pre-processing
+First, check for for NA values and blank character values, since they need to be
+dealt with before most machine learning tools can be applied.
+
+```{r findNA}
+checkContent <- function(x) {
+  if (is.character(x)) {
+    return(mean(x==""))
+  } else {
+    return(mean(is.na(x)))
+  }
+}
+table(sapply(train, checkContent))
+```
+
+Since some fields are almost entirely NA or blank but most fields have no NA or
+blank values, simply remove all columns in which an NA or blank value is found.
+Little information is lost, and imputing these values would be unreliable.
+
+```{r remNA}
+train <- train[, sapply(train, function(x) checkContent(x)==0)]
+```
+
+Next, check the types of the features remaining, and look at the head of the
+character variables to see if they still hold any useful information.
+
+```{r chars}
+table(sapply(train, class))
+head(train[, sapply(train, function(x) !is.numeric(x))], n=3)
+```
+
+There's the "classe" feature to be predicted, which is extremely important, but 
+the others (user_name, cvtd_timestamp, new_window) seem unlikely to be of
+predictive value. Remove from data set.
+
+```{r remChars}
+train <- train[, -which(names(train) %in% c("user_name", "cvtd_timestamp", "new_window"))]
+```
+
+### Exploratory Analysis
+Examine the correlation matrix for the predictor features, which are now all
+numeric, to check for patterns or major groups of correlated variables.
+
+```{r matrix}
+heatmap(abs(cor(train[, sapply(train, is.numeric)])))
+```
+
+There are some small, somewhat correlated groups, but no major trends.
+
+## Modeling
+### Training
+This is a supervised classification problem, so candidates include methods such
+as random forest, linear discriminant, and gradient boosting models. Train 
+candidate models using 10-fold cross-validation to further improve accuracy, and
+excluding the "X" feature, which simply indexes all entries.  
+
+Broken up into separate chunks because oh boy does this take a while.
+
+```{r train_rf, cache=T}
+trctrl <- trainControl(method="cv", number=10)
+rf <- train(classe~.-X, data=train, method="rf", trControl=trctrl)
+```
+```{r train_lda, cache=T, results="hide"}
+lda <- train(classe~.-X, data=train, method="lda", trControl=trctrl)
+```
+```{r train_gbm, cache=T, results="hide"}
+gbm <- train(classe~.-X, data=train, method="gbm", trControl=trctrl)
+```
+
+### In Sample Accuracy
+Check in-sample accuracy rates, to determine which candidate model is best.
+
+```{r acc}
+confusionMatrix(predict(rf, train), factor(train$classe))$overall
+confusionMatrix(predict(lda, train), factor(train$classe))$overall
+confusionMatrix(predict(gbm, train), factor(train$classe))$overall
+```
+
+## Testing
+### Test Cases
+Use the most accurate model to predict the "classe" for the test cases in the 
+"test" dataset.
+
+```{r predict}
+predict(rf, test)
+```
