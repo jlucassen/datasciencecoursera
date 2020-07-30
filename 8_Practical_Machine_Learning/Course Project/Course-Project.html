@@ -368,7 +368,7 @@ summary {
 
 <div id="introduction" class="section level2">
 <h2>Introduction</h2>
-<p>The goal of this project is to use the UCI HAR data set provided in the assignment to train and test a machine learning model to predict the “type” of activity performed. First the data is loaded, cleaned, and explored. Next, three candidate models are trained, and their in-sample error rates are compared to determine the best predictor. Finally, this best predictor is applied to the test set.</p>
+<p>The goal of this project is to use the HAR data set provided in the assignment to train and test a machine learning model to predict the type of activity performed. First the data is loaded, cleaned, and explored. Next, three candidate models are trained, and their in-sample error rates are compared to determine the best predictor. Finally, the best predictor is applied to the test set.</p>
 <pre class="r"><code>library(caret)</code></pre>
 <pre><code>## Loading required package: lattice</code></pre>
 <pre><code>## Loading required package: ggplot2</code></pre>
@@ -453,7 +453,7 @@ rf &lt;- train(classe~.-X, data=train, method=&quot;rf&quot;, trControl=trctrl)<
 <h2>Testing</h2>
 <div id="test-cases" class="section level3">
 <h3>Test Cases</h3>
-<p>Use the most accurate model to predict the “classe” for the test cases in the “test” dataset.</p>
+<p>Use the most accurate model to predict the “classe” for the test cases in the “test” dataset. Given how high the in-sample accuracy is, it seems possible that the model is somewhat overtrained. Out-of-sample accuracy is also usually lower in general, so 90-95% seems like a reasonable estimate.</p>
 <pre class="r"><code>predict(rf, test)</code></pre>
 <pre><code>##  [1] B A B A A E D B A A B C B A E E A B B B
 ## Levels: A B C D E</code></pre>

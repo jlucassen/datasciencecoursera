@@ -4,11 +4,11 @@ output: html_document
 ---
 
 ## Introduction
-The goal of this project is to use the UCI HAR data set provided in the 
-assignment to train and test a machine learning model to predict the "type" of 
-activity performed. First the data is loaded, cleaned, and explored. Next, three
+The goal of this project is to use the HAR data set provided in the assignment 
+to train and test a machine learning model to predict the type of activity 
+performed. First the data is loaded, cleaned, and explored. Next, three 
 candidate models are trained, and their in-sample error rates are compared to
-determine the best predictor. Finally, this best predictor is applied to the
+determine the best predictor. Finally, the best predictor is applied to the
 test set.
 
 ```{r setup}
@@ -105,7 +105,9 @@ confusionMatrix(predict(gbm, train), factor(train$classe))$overall
 ## Testing
 ### Test Cases
 Use the most accurate model to predict the "classe" for the test cases in the 
-"test" dataset.
+"test" dataset. Given how high the in-sample accuracy is, it seems possible that
+the model is somewhat overtrained. Out-of-sample accuracy is also usually lower
+in general, so 90-95% seems like a reasonable estimate.
 
 ```{r predict}
 predict(rf, test)
