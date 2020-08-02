@@ -1,0 +1,10 @@
+base
+ggplot2
+ggmap
+leaflet
+magrittr
+xml2
+rvest
+lattice
+caret
+mice

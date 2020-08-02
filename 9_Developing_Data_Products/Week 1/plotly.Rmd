@@ -1,0 +1,16 @@
+---
+title: "plotly"
+output: html_document
+---
+
+```{r}
+library(plotly)
+library(magrittr)
+statePops <- data.frame(State=state.abb, Pop=data.frame(state.x77)$Population)
+statePops$hover <- paste(statePops$State, "<br>", "Population :", statePops$Pop)
+map_opts <- list(scope='usa')
+plot_ly(data=statePops, z=statePops$Pop, text=statePops$hover, locations=statePops$State, type='choropleth', locationmode="USA-states", color=statePops$Pop, colors="Blues") %>%
+  layout(geo=map_opts)
+
+
+```

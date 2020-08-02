@@ -1,0 +1,127 @@
+---
+title: "Project-2"
+output: html_document
+---
+
+## Introduction
+Here I will investigate the relationship between city size and GDP, as part of 
+an attempt to further explore the claim made in *Growth* by Vaclav Smil, that 
+cities have "a disproportionate influence on creating culture, setting 
+commercial priorities, influencing political development, supplying an educated
+labor force, determining tastes and fashions, and fostering innovation"
+(Smil, 332). Much of this is difficult to investigate quantitatively, but GDP
+can serve as an extremely rough proxy for these variables. The exact hypothesis
+acting as a proxy for Smil's claim is "GDP scales nonlinearly with city size,
+with significant positive curvature".
+```{r setup, message=F}
+library(caret)
+library(ggmap)
+library(leaflet)
+library(magrittr)
+library(mice)
+library(rvest)
+```
+
+## Getting and Pre-Processing Data
+First, get the data from Wikipedia. Read it in as an html tree, then get the
+appropriate node using the path obtained via Inspect Element on the original
+page, then convert to a table. Do this for Wikipedia's lists of cities with
+highest GDPs and populations.
+```{r get}
+gdp_wiki <- 'https://en.wikipedia.org/wiki/List_of_cities_by_GDP' %>%
+  url %>%
+  read_html() %>%
+  html_node('body #content #bodyContent #mw-content-text .mw-parser-output .wikitable') %>%
+  html_table(fill=T)
+pop_wiki <- 'https://en.wikipedia.org/wiki/List_of_largest_cities' %>%
+  url %>%
+  read_html %>%
+  html_node('body #content #bodyContent #mw-content-text .mw-parser-output .sortable') %>%
+  html_table(fill=T)
+```
+Next, organize the table. Select only relevant columns from each table, renaming
+them with tidier names. Merge them by their first columns, which identify each
+row. This will return only rows for cities with both population and GDP data.
+```{r tidy}
+gdp_wiki <- gdp_wiki[, c(1,4,5,6,7,8)]
+names(gdp_wiki) <- c("city", "official.nom.gdp", "brook.ppp.gdp", "pwc.ppp.gdp", "mckin.nom.gdp", "other.gdp")
+pop_wiki <- pop_wiki[, c(1,4,6,8,10)]
+names(pop_wiki) <- c("City", "un_est.pop", "city_proper.pop", "metro_area.pop", "urban_area.pop")
+wiki <- merge(gdp_wiki, pop_wiki, by=c(1,1), )
+```
+Now that the table itself is organized, clean up the data. All the data is in
+character format, and most have odds and ends that must be removed before they
+can be converted to numeric. Most of these are either commas, citations in [],
+or dates in (). After removing these, convert to numeric. Finally, remove
+columns which are particularly sparse, and impute missing data using mice.
+```{r clean, warning=F, message=F}
+wiki <- data.frame(apply(wiki, 2, function(x) gsub(",|\\[.*\\]|\\(.*\\)","",x)))
+wiki[,-1] <- apply(wiki[,-1], 2, as.numeric)
+apply(wiki, 2, function(x) mean(is.na(x)))
+wiki <- wiki[, -c(6, 9)]
+wiki <- complete(mice(wiki, print=F))
+```
+Finally, summarize the data, creating two new fields to hold averages of the
+different measures of population and GDP. This makes simple visualization more
+straightforward when less detail is needed, and may even provide a more accurate
+estimator of the variables these measures are meant to capture.
+```{r summarize}
+wiki$gdp <- apply(wiki, 1, function(x) mean(as.numeric(x[c(2,3,4,5)])))
+wiki$pop <- apply(wiki, 1, function(x) mean(as.numeric(x[c(6,7,8)])))
+```
+
+## Exploratory Analysis
+Start by checking the correlation matrix - expecting to see two blocks, as GDP
+measures and population measures should correlate highly. Next, visualize
+distributions of city GDP measures and population measures.
+```{r vis}
+heatmap(cor(wiki[,-1]))
+par(mfrow=c(1,2))
+boxplot(wiki[,c(2,3,4,5,9)], main="GDP")
+boxplot(wiki[,c(6,7,8,10)], main="POP")
+```
+Since the distributions of population measures and gdp measures are all roughly
+the same shape, the "gdp" and "pop" summary fields will likely be representative
+and usable.
+
+## Leaflet Map
+Map out the data: here circle size corresponds to the UN's estimate of 
+population size, and circle color corresponds to the log of official nominal
+GDP.
+```{r map, cache=T, message=F}
+colorMap <- colorNumeric(c('red', 'blue'), domain=NULL)
+geocode(wiki$city) %>%
+  leaflet %>%
+  addTiles %>%
+  addCircles(radius=wiki$pop/30, color=colorMap(log10(wiki$gdp)))
+```
+
+## Analysis
+Try fitting two regression models: linear and exponential.
+```{r model, cache=T}
+line <- lm(gdp~pop, data=wiki)
+expo <- lm(gdp~log10(pop), data=wiki)
+```
+To evaluate these models, first visually compare to the plot. Next, examine the
+model summaries to determine which is the best mechanistic fit, by Occam's Razor
+basically.
+```{r eval}
+plot(gdp~pop, data=wiki)
+abline(line, col='red')
+lines(seq(5000000, 30000000, 1000000), predict(expo, data.frame(pop=seq(5000000, 30000000, 1000000))), col='blue')
+summary(line)
+summary(expo)
+```
+
+## Conclusions
+Based on this analysis, frankly very little of interest has been found. 
+Regarding the original hypothesis, no convincing evidence was found to back up
+Smil's claim. However, this is a relatively low-power experiment due to the
+multiple layers of proxies and small sample size, so this is not too meaningful.
+Interestingly, the curve fit model found a negative curvature, which would imply
+diminishing returns on GDP with increasing city population, precisely the
+opposite of Smil's claim. No interesting geographic patterns were found either.
+
+
+All in all, the main conclusion is that city productivity is too complex to be
+analyzed with just some Wikipedia tables.
