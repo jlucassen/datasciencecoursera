@@ -1,0 +1,95 @@
+---
+title: "Pitch"
+output: slidy_presentation
+---
+
+## Overview
+My project is a simple web app that does automatic encoding and decoding of 
+a few simple ciphers, namely the Caesar, Atbash, and Vignere Ciphers. Each tab
+has the appropriate input fields for its corresponding cipher, a pair of radio
+buttons to control whether it encodes or decodes, and simply outputs the result
+to the screen, where the user can read or copy it freely.
+
+## The Caesar Cipher
+This is a classic that's a fun puzzle for kids just getting into cryptography.
+The code is simple too - all it does is sort the message into uppercase and 
+lowercase, translate into integers and move them down to the 0-25 range, apply
+the key, apply a modulo to make sure everything stays within the alphabet, and 
+move back up the appropriate ranges before converting back to characters for
+output.
+
+```{r eval=F}
+nums <- utf8ToInt(input$caesarIn)
+uppr <- which(nums>=65&nums<=90)
+lowr <- which(nums>=97&nums<=122)
+key <- input$caesarKey
+if (input$caesarED=='Decode') {key <- -key}
+nums[uppr] <- nums[uppr] - 65
+nums[lowr] <- nums[lowr] - 97
+nums[c(uppr, lowr)] <- nums[c(uppr, lowr)] + key
+nums[c(uppr, lowr)] <- nums[c(uppr, lowr)]%%26
+nums[uppr] <- nums[uppr] + 65
+nums[lowr] <- nums[lowr] +97
+return(intToUtf8(nums))
+```
+
+## The Atbash Cipher
+The Atbash Cipher is another classic, and I think actually older than the
+Caesar, but a bit less well known. The code is even simpler than the Caesar,
+it just sorts into uppercase and lowercase and flips across the appropriate
+axes. 
+
+```{r eval=F}
+nums <- utf8ToInt(input$atbashIn)
+uppr <- which(nums>=65&nums<=90)
+lowr <- which(nums>=97&nums<=122)
+nums[uppr] <- nums[uppr] + 2*(77.5-nums[uppr])
+nums[lowr] <- nums[lowr] + 2*(109.5-nums[lowr])
+return(intToUtf8(nums))
+```
+In fact, it's short enough that I can run a sample in the slide!
+```{r}
+nums <- utf8ToInt('Look, a demo! With caps and punctuation and stuff! In the slide!')
+uppr <- which(nums>=65&nums<=90)
+lowr <- which(nums>=97&nums<=122)
+nums[uppr] <- nums[uppr] + 2*(77.5-nums[uppr])
+nums[lowr] <- nums[lowr] + 2*(109.5-nums[lowr])
+print(intToUtf8(nums))
+```
+
+## The Vignere Cipher
+Finally, the Vignere Cipher adds some sophistication after the simple Caesar and
+Atbash, both of which are straightforwardly solvable with frequency analysis or
+just brute force guessing. The Vignere was actually thought to be unbreakable
+for a whole, until it was... uh... broken. The code is remarkably simple, since
+R's method of adding vectors with different lengths is exactly how the Vignere
+applies its key! That similarity is actually what gave me the idea for this, and
+I actually started with just the Vignere before adding the Caesar and Atbash.
+Here's what the code looks like:
+```{r eval=F}
+nums <- utf8ToInt(input$vignereIn)
+uppr <- which(nums>=65&nums<=90)
+lowr <- which(nums>=97&nums<=122)
+key <- utf8ToInt(tolower(input$vignereKey))-97
+if (input$vignereED=='Decode') {key <- -key}
+nums[uppr] <- nums[uppr] - 65
+nums[lowr] <- nums[lowr] - 97
+locs <- c(uppr, lowr)[order(c(uppr, lowr))]
+nums[locs] <- nums[locs] + key
+nums[locs] <- nums[locs]%%26
+nums[uppr] <- nums[uppr] + 65
+nums[lowr] <- nums[lowr] +97
+return(intToUtf8(nums))
+```
+
+## Other Ciphers
+There's a bunch of other stuff I could have done, but I didn't really want to do
+that much more. The Caesar and Atbash are both specific versions of a more 
+general method called the Affine Cipher. The Affine takes two integer keys and
+shifts by the first, then flips according to the second. Interestingly, while a
+vectorization of the Caesar is called a Vignere, I'm not sure if there's a name
+for the vectorized Atbash or Affine. Maybe they're just not as name-worthy
+because they weren't as famous historically.
+
+In any case, thank you for reading all the way to the end of my pitch thing!
+Have a wonderful day, friend on the other side of the internet.

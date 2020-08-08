@@ -1,0 +1,112 @@
+---
+title: "Project-3"
+output: slidy_presentation
+---
+## Introduction
+The goal of this project is to use plotly to make some funky plots of real and
+complex Fibonacci numbers, for the Week 3 Project as part of Course 9 of the
+Data Science Specialization on Coursera, "Developing Data Products". Primarily
+inspired by Stand-up Maths' YouTube video "Complex Fibonacci Numbers?" (https://www.youtube.com/watch?v=ghxQA3vvhsk).
+
+This project was completed on **August 2, 2020**.
+
+```{r setup}
+suppressPackageStartupMessages(library(plotly))
+library(magrittr)
+```
+
+## Real Fibonacci Numbers, Part 1
+Start by generalizing the Fibonacci numbers from integers to the whole real
+number line. The Binet formula for the nth Fibonacci number can take non-integer
+inputs, but it will produce complex results. This is 3D information, with a 1D
+input and 2D output. An easy way to represent it is a line graph on the complex
+plane. This first graph shows only the real Fibonacci numbers from 0 to 5, and
+maps the path that the Fibonacci sequence travels along the complex plane. Whole
+values are shown as black dots, always falling at whole numbers along the real
+line.
+
+```{r real1}
+phi <- (1+sqrt(5))/2
+binet <- function(x) {((phi^x) - ((-1/phi)^x))/sqrt(5)}
+plot(binet(complex(real=seq(0, 5, 0.01))), type='l', col='red', main="Real Fibonacci Numbers 0 to 5", xlab="Real", ylab="Imaginary")
+points(binet(complex(real=0:5)), pch=16)
+abline(h=0)
+abline(v=0)
+```
+
+## Real Fibonacci Numbers, Part 2
+Next, show from -5 to 5. Positive values of n are shown in red, negative values
+in blue.
+
+```{r real2}
+phi <- (1+sqrt(5))/2
+binet <- function(x) {((phi^x) - ((-1/phi)^x))/sqrt(5)}
+plot(binet(complex(real=seq(0, 5, 0.01))), type='l', col='red', ylim=c(-5,5), xlim=c(-5, 5), main="Real Fibonacci Numbers -5 to 5", xlab="Real", ylab="Imaginary")
+lines(binet(complex(real=seq(-5, -0.1, 0.01))), type='l', col='blue')
+points(binet(complex(real=-5:5)), pch=16)
+abline(h=0)
+abline(v=0)
+```
+
+## Real Fibonacci Numbers, Part 3
+Finally, we can attempt to show this 3D information in 3D, using Plotly. This
+will have three axes. Input is the input to the Binet formula. Real is the real
+component of the Fibonacci sequence, and Imaginary is the imaginary component.
+
+```{r real3}
+phi <- (1+sqrt(5))/2
+binet <- function(x) {((phi^x) - ((-1/phi)^x))/sqrt(5)}
+n <- seq(-10, 10, 0.01)
+fib <- binet(complex(real=n))
+plot_ly(x=~n, y=~Re(fib), z=~Im(fib), type='scatter3d', mode='lines', colors = colorRamp(c('blue', 'gray', 'red'))) %>%
+  layout(title="3D Visualization of Real Fibonacci Path", scene=list(xaxis=list(title="Input"), yaxis=list(title="Real"), zaxis=list(title="Imaginary")))
+```
+
+## Complex Fibonacci Numbers, Part 1
+Of course, the next step from real-indexed Fibonacci numbers with complex values
+is complex-indexed Fibonacci numbers with complex values. This is 4D information
+with a 2D input and 2D output, however, making it a bit hard to visualize. One
+way to alleviate this is to split it the results into two graphs, representing
+the real and imaginary outputs separately. Stick with positive input values,
+since things get really messy really quickly in the othe quadrants.
+
+```{r complex1}
+phi <- (1+sqrt(5))/2
+binet <- function(x) {((phi^x) - ((-1/phi)^x))/sqrt(5)}
+a <- 10
+real <- matrix(1:a^2, nrow = a)
+imag <- matrix(1:a^2, nrow = a)
+for (x in 1:a) {
+  for (i in 1:a) {
+    c <- binet(complex(real=x,imaginary=i))
+    real[x,i] <- Re(c)
+    imag[x,i] <- Im(c)
+  }
+}
+plot_ly(z=~real, type="surface", colors = colorRamp(c('blue', 'gray', 'red'))) %>%
+  layout(title="Real Component of Output", scene=list(xaxis=list(title="Real Input"), yaxis=list(title="Imaginary Input"), zaxis=list(title="Real Output")))
+plot_ly(z=~imag, type="surface", colors = colorRamp(c('blue', 'gray', 'red'))) %>%
+  layout(title="Imaginary Component of Output", scene=list(xaxis=list(title="Real Input"), yaxis=list(title="Imaginary Input"), zaxis=list(title="Imaginary Output")))
+```
+
+## Complex Fibonacci Numbers, Part 2
+Next, attempt to unify these two plots into a single surface, by color-coding
+the imaginary component.
+
+```{r complex2}
+phi <- (1+sqrt(5))/2
+binet <- function(x) {((phi^x) - ((-1/phi)^x))/sqrt(5)}
+a <- 10
+real <- matrix(1:a^2, nrow = a)
+imag <- matrix(1:a^2, nrow = a)
+for (x in 1:a) {
+  for (i in 1:a) {
+    c <- binet(complex(real=x,imaginary=i))
+    real[x,i] <- Re(c)
+    imag[x,i] <- Im(c)
+  }
+}
+plot_ly(z=~real, type="surface", scene='r', colors = colorRamp(c('blue', 'gray', 'red')), surfacecolor=imag) %>%
+  layout(title="The Full Fledged Four-D Fibonacci!", scene=list(xaxis=list(title="Real Input"), yaxis=list(title="Imaginary Input"), zaxis=list(title="Real Output"))) %>%
+  colorbar(title="Imaginary Output")
+```

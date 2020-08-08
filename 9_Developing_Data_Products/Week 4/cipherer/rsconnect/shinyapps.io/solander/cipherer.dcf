@@ -1,0 +1,12 @@
+name: cipherer
+title: cipherer
+username:
+account: solander
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 2638928
+bundleId: 3471414
+url: https://solander.shinyapps.io/cipherer/
+when: 1596501998.40206
+asMultiple: FALSE
+asStatic: FALSE
