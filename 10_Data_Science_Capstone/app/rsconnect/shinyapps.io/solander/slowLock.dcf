@@ -1,0 +1,12 @@
+name: slowLock
+title: slowLock
+username:
+account: solander
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 2687264
+bundleId: 3535748
+url: https://solander.shinyapps.io/slowLock/
+when: 1597878562.86117
+asMultiple: FALSE
+asStatic: FALSE

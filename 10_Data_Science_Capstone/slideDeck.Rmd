@@ -1,0 +1,49 @@
+---
+title: "Slide Deck"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## How Does it Work?
+
+1. Data is loaded, cleaned, and separated into training/testing sets.  
+2. Training set is tokenized into 1-, 2-, and 3-grams.  
+3. For each n-gram, the frequency is recorded, and the word that is most likely
+to follow is identified.  
+4. Prediction uses a modified back-off method, backing off if the ratio of
+evidence available for a shorter n-gram is sufficiently large. Ratio tuned on 
+testing set.
+
+## How Well Does it Predict?
+
+When evaluating the model on the training set, accuracy was about 10.4%, and the
+model was unable to make a prediction about 6% of the time.
+
+No clear differences in accuracy or failure rate across the three data sources,
+or across predictions based on 1-, 2-, or 3-grams.
+
+Let's be honest, 10% is a pretty disappointing accuracy rate. But it makes 
+sense, since language is pretty unpredictable - there are statistical tendencies
+a tool like this can latch on to, but they're pretty weak.
+
+## Usefulness
+
+If this tool were implemented as an autocomplete system, allowing users to fill
+in the next word in a single keystroke rather than typing it all out, it could
+be useful even with only 10% accuracy. Since the average English word is about 5
+letters, this would save 80% of keystrokes 10% of the time, an overall saving
+of 8%. 
+
+If a user spend (very conservatively!) an hour a day typing, this tool will save
+the user 700 hours over the course of a year! Using (again conservatively) the
+US federal minimum wage of $7.25/hour as a conversion factor to estimate how 
+valuable that time is, that comes out to over $5,000 a year!
+
+## Demonstration
+
+The final product is available [as a Shiny app](https://solander.shinyapps.io/slowLock/)
+
+More details available [on GitHub](https://github.com/jlucassen/datasciencecoursera/blob/master/10_Data_Science_Capstone/dataScienceCapstone.pdf)
